@@ -6,15 +6,15 @@
 
 1. 工作地点热力图分析
 
-    ![avatar](relitu.png)
+    ![image](https://github.com/happened/whatJob/blob/master/relitu.PNG)
 
 2. 招聘待遇分析
 
-    ![avatar](xinzi.png)
+    ![image](https://github.com/happened/whatJob/blob/master/xinzi.PNG)
 
 3. 招聘技能关键字
 
-    ![avatar](keyword.png)
+    ![image](https://github.com/happened/whatJob/blob/master/keyword.PNG)
 
 
 # 如何使用
