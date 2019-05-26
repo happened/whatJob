@@ -11,13 +11,35 @@ from whatJob.config import GlobalVar
 curPwdPath=GlobalVar.get_value("curPwdPath")
 #处理工资 清洗数据
 
+#规范化钱的单位 将万和千表示转化为数字
+def NormalizeMoney(moneyStr):
+
+    res=moneyStr.replace("万","0000").replace("W", "0000").replace("千","000").replace("K","000").replace("k", "000")
+
+    result= res.split("-")
+
+    if len(result)>2:
+        if "." in result[0]:
+            result[0].replace(".","")
+            result[0]=result[0][:len(result[0])-1]
+
+        if "." in result[1]:
+            result[1].replace(".","")
+            result [1]= result[1][:len(result[1]) - 1]
+
+    return result
+
+
 def processSalary(salaryStr,rate):
     wage=''
-    wageStr=re.findall(r"\d+-?\d+",salaryStr)
-    if len(wageStr)==0:
-        return
-    wageRange=wageStr[0].split("-")
+    #wageStr=re.findall(r"\w+-\w+",salaryStr)
+    #if len(wageStr)==0:
+        #return
+    #wageRange=wageStr[0].split("-")
 
+    #貌似网站更改了钱的名称单位
+
+    wageRange=NormalizeMoney(salaryStr)
     try:
         i=int ( int(wageRange[0])*0.9 + int(wageRange[1])*0.1 )
         if i < 4000:

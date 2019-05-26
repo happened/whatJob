@@ -30,7 +30,7 @@ def ignore(stopwords):
         stopwords.add(i)
 #生成词云
 
-def generateCloud(job):
+def GenerateCloud(job):
     comment_text=open(curPwdPath+"result\\"+job+"\\"+job+".txt",'r',encoding='utf-8').read()
     #cut_text=" ".join(jieba.cut(comment_text))
     #找到频率最高的分词
@@ -83,6 +83,5 @@ def generateCloud(job):
     word_cloud.to_file(curPwdPath+"result\\"+job+"\\"+job+"KeyWord.jpg")
     #plt.savefig(job,dpi=600)
 
-if __name__=="__main__":
-    generateCloud("Golang")
+
 

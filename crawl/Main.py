@@ -12,6 +12,7 @@ from bs4 import BeautifulSoup
 
 from whatJob.config import GlobalVar
 
+
 GlobalVar._init()
 baseUrl="https://sou.zhaopin.com/?jl=489&"
 curPwdPath="D:\\python\\whatJob\\"
@@ -24,7 +25,7 @@ GlobalVar.set_value("curPwdPath",curPwdPath)
 
 from whatJob.config import Brower
 from whatJob.config import GenerateHeadList
-from whatJob.crawl import Salary,Map
+from whatJob.crawl import Salary,Map,WordCloud
 
 
 #初始化一些全局变量
@@ -108,13 +109,13 @@ def threadGetList(curPage,endPage,allList,job,):
         #这里貌似有个bug 网站改版了
         #jobDescribe = jobshtml.find_all(id="list-content-pile")
         try:
-            jobDescribe=jobshtml.find_all(class_="contentpile__content")
+            jobDescribe=jobshtml.find('div',class_="contentpile__content")
 
-            if len(jobDescribe)==0:
+            if jobDescribe==None:
                 logging.warning("Failed to find the class content the href\n")
                 exit(1)
 
-            list = jobDescribe[0].find_all('a')
+            list = jobDescribe.find_all('a')
 
             if len(list)>=0:
                 for index in list:
@@ -123,7 +124,7 @@ def threadGetList(curPage,endPage,allList,job,):
                         allList.append(href)
             else:
                 raise IndexError
-        except IndexError as e:
+        except  ValueError as e:
             logging.error(e)
 
 
@@ -152,15 +153,17 @@ def getJobinfo(job,jobUrls,companyPos):
 
         html=BeautifulSoup(htmlStr.text,'lxml')
         # 数据清洗
-        html=html.find('div',class_='main')
+        html=html.find('div',class_='app')
+
+
 
         #职位名
-        jobNameTag = html.find('li', class_="info-h3")
+        jobNameTag = html.find('h3', class_="summary-plane__title")
         jobNameStr= jobNameTag.get_text().strip()
         jobNameStrs=jobNameStr.split('\n')
 
         #月薪
-        jobMoneyTag=html.find('div',class_='info-money')
+        jobMoneyTag=html.find('span',class_='summary-plane__salary')
         jobMoneyStr=jobMoneyTag.get_text().strip()
         jobMoneyStrs=jobMoneyStr.split('\n')
         Salary.processSalary(jobMoneyStrs[0],rate)
@@ -175,9 +178,9 @@ def getJobinfo(job,jobUrls,companyPos):
             fileContent += jobNameStrs[0] + ": \n" + "薪资:" + "\n"
 
         # 工作地点
-        pos = html.find('div', class_='pos-common work-add cl')
+        pos = html.find('div', class_='job-address__content')
         if pos != None:
-            addressTag = pos.find('p', class_='add-txt')
+            addressTag = pos.find('span', class_='job-address__content-text')
             if addressTag != None:
                 addressStr = addressTag.get_text().strip()
 
@@ -185,7 +188,7 @@ def getJobinfo(job,jobUrls,companyPos):
         fileContent+="公司地址: "+addressStr+ "\n"
 
         # 工作要求
-        requireTag = html.find('div', class_='pos-ul')
+        requireTag = html.find('div', class_='describtion__detail-content')
         requireStrs = []
 
         if requireTag != None:
@@ -228,7 +231,7 @@ def getJobinfo(job,jobUrls,companyPos):
 
 if __name__=='__main__':
 
-    job="C"
+    job="芯片"
     #通过创建文件夹将所有的结果包括json文件 html文件以及txt文档集合在result下的job目录
     isExists=os.path.exists(curPwdPath+"result\\"+job)
 
@@ -237,7 +240,7 @@ if __name__=='__main__':
     # 公司地址
     companyPos = []
 
-    urls=getJobUrl(job,1,1)
+    urls=getJobUrl(job,10,5)
 
     if len(urls)!=0:
         hrefTxt=open("D:\\python\\whatJob\\tempUrl\\urlTxt.txt",'wt')
@@ -258,6 +261,8 @@ if __name__=='__main__':
         #处理公司经纬度 写入到jingwei.json里
         Map.getJinWei(job,companyPos)
         Map.generateHtml(job)
+
+        WordCloud.GenerateCloud(job)
 
     else:
         logging.error("未得到职业信息")
